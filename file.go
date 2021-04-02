@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -92,6 +93,20 @@ func parseFile(inputPath string, xxxSkip []string) (areas []textArea, err error)
 					continue
 				}
 				currentTag := field.Tag.Value
+
+				// 特殊处理 tag = json
+				if strings.Contains(tag,`json:"`) {
+					strs:=strings.Fields(currentTag)
+					var b bytes.Buffer
+					for i:=range strs {
+						if !strings.HasPrefix(strs[i],`json:"`) {
+							b.WriteString(strs[i])
+							b.WriteString(" ")
+						}
+					}
+					currentTag = b.String()
+				}
+
 				area := textArea{
 					Start:      int(field.Pos()),
 					End:        int(field.End()),
